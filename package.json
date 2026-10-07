@@ -1,0 +1,17 @@
+{
+  "name": "harvest-town-calculator",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Free Harvest Town calculators: crop profits, animal payback, fishing values and NPC gifts. Unofficial fan tool.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.2.1",
+    "astro": "^5.1.0"
+  }
+}

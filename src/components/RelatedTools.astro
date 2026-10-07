@@ -1,0 +1,19 @@
+---
+import { TOOLS } from '../config';
+const { exclude = [], current }: { exclude?: string[]; current?: string } = Astro.props;
+const related = TOOLS.filter((t) => !exclude.includes(t.slug) && t.slug !== current);
+---
+<section>
+ <h2>Related Harvest Town tools</h2>
+ <div class="grid-cards">
+ {related.map((t) => (
+ <a class="tool-card" href={`/tools/${t.slug}/`}>
+ <img src={`/icons/${t.icon}`} width="48" height="48" alt="" loading="lazy" />
+ <span>
+ <span class="t">{t.name}</span>
+ <span class="d">{t.oneLiner}</span>
+ </span>
+ </a>
+ ))}
+ </div>
+</section>

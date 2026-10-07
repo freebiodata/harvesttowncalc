@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+import { TOOLS } from '../config';
+---
+<Base
+ currentPath="/404/"
+ title="Page Not Found - HT Calculator"
+ description="That page doesn't exist. Here are the Harvest Town calculators and guides."
+ path="/404/"
+ noindex={true}
+ skipCanonical={true}
+>
+ <h1>404 - this field is empty</h1>
+ <p class="value-line">The page you tried doesn’t exist (or moved). Try one of these instead:</p>
+ <div class="grid-cards">
+ {TOOLS.map((t) => (
+ <a class="tool-card" href={`/tools/${t.slug}/`}>
+ <img src={`/icons/${t.icon}`} width="48" height="48" alt="" loading="lazy" />
+ <span>
+ <span class="t">{t.name}</span>
+ <span class="d">{t.oneLiner}</span>
+ </span>
+ </a>
+ ))}
+ </div>
+ <p>Or check the <a href="/sitemap/">full sitemap</a>.</p>
+</Base>

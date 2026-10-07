@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+---
+<Base
+ currentPath="/terms/"
+ title="Terms of Use - HT Calculator"
+ description="Plain-language terms for using HT Calculator: provided as-is, fan-made, game data may change without notice."
+ path="/terms/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Terms' }]}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Terms' }]} />
+ <h1>Terms of use</h1>
+
+ <section class="prose">
+ <h2>The short version</h2>
+ <p>HT Calculator is a free, unofficial fan tool provided “as is”. Use it to plan your farm; don’t rely on it as the game’s ground truth. The game changes, the wiki lags, and we can be wrong - see the <a href="/disclaimer/">disclaimer</a>.</p>
+
+ <h2>Use of the site</h2>
+ <ul>
+ <li>You may use the tools and read the guides for personal, non-commercial purposes.</li>
+ <li>Don’t scrape, mirror or re-serve the site or its data wholesale without asking; linking is always welcome.</li>
+ <li>Don’t attempt to disrupt or overload the service.</li>
+ </ul>
+
+ <h2>No warranty</h2>
+ <p>The site and its data are provided without warranties of accuracy, availability or fitness for a particular purpose. Game values may be outdated or wrong; verify in-game before spending hard-earned coins.</p>
+
+ <h2>Liability</h2>
+ <p>To the maximum extent permitted by law, we’re not liable for losses arising from use of this site - including the 2,800 coins you spent on a peacock because our table said “fast payback”. (Joking aside: our numbers are best-effort, not guarantees.)</p>
+
+ <h2>Intellectual property</h2>
+ <p>The site’s code and written guides belong to the HT Calculator team. Harvest Town, its name, and its game assets belong to AVIDGamers / Dataverse Co., Limited; item icons and NPC portraits are used for identification with credit to the <a href="https://harvest-town.fandom.com" rel="noopener">Harvest Town Wiki</a>, and are removed promptly on request from the rights holder.</p>
+
+ <h2>Changes</h2>
+ <p>These terms may be updated; material changes are dated here and noted in the <a href="/changelog/">changelog</a>. Last updated: 2026-10-07.</p>
+ </section>
+</Base>

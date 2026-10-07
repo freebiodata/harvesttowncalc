@@ -1,0 +1,49 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { seoJsonLd, canonical, type SeoInput } from '../utils/seo';
+
+export interface Props extends SeoInput {
+ currentPath: string;
+ skipCanonical?: boolean; // for the 404: a noindex error page needs no canonical
+}
+
+const { title, description, path, noindex = false, breadcrumbs, webApp, article, currentPath, skipCanonical = false } = Astro.props;
+const jsonLd = seoJsonLd({ title, description, path, noindex, breadcrumbs, webApp, article });
+const url = canonical(path);
+---
+<!doctype html>
+<html lang="en">
+ <head>
+ <meta charset="utf-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+ <title>{title}</title>
+ <meta name="description" content={description} />
+ {skipCanonical ? null : <link rel="canonical" href={url} />}
+ {noindex ? <meta name="robots" content="noindex, follow" /> : <meta name="robots" content="index, follow" />}
+ <meta property="og:type" content="website" />
+ <meta property="og:site_name" content="Harvest Town Calculator" />
+ <meta property="og:title" content={title} />
+ <meta property="og:description" content={description} />
+ <meta property="og:url" content={url} />
+ <meta name="theme-color" content="#2f6b2a" />
+ <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+ <script type="application/ld+json" set:html={jsonLd} />
+ <script>
+ // First-party analytics layer: queues events locally. Wire window.htq to
+ // GA4/Plausible in one place when a measurement ID exists - see /methodology/.
+ window.htq =
+ window.htq ||
+ ((...args) => (window.htq.q = window.htq.q || []).push(args));
+ </script>
+ </head>
+ <body>
+ <a class="skip-link" href="#main">Skip to main content</a>
+ <Header currentPath={currentPath} />
+ <main id="main" class="wrap">
+ <slot />
+ </main>
+ <Footer />
+ </body>
+</html>

@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { TOOLS, GUIDES } from '../config';
+
+const legal = [
+ ['/about/', 'About'],
+ ['/methodology/', 'Methodology & data sources'],
+ ['/contact/', 'Contact & corrections'],
+ ['/changelog/', 'Changelog'],
+ ['/privacy/', 'Privacy policy'],
+ ['/terms/', 'Terms of use'],
+ ['/disclaimer/', 'Disclaimer'],
+];
+---
+<Base
+ currentPath="/sitemap/"
+ title="HTML Sitemap - HT Calculator"
+ description="Every page on HT Calculator: all Harvest Town calculators, guides and policy pages in one list."
+ path="/sitemap/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Sitemap' }]}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Sitemap' }]} />
+ <h1>Sitemap</h1>
+
+ <section class="prose">
+ <h2>Main</h2>
+ <ul>
+ <li><a href="/">Home</a></li>
+ <li><a href="/tools/">All tools</a></li>
+ <li><a href="/guides/">All guides</a></li>
+ </ul>
+ <h2>Tools</h2>
+ <ul>
+ {TOOLS.map((t) => <li><a href={`/tools/${t.slug}/`}>{t.name}</a> - {t.oneLiner}</li>)}
+ </ul>
+ <h2>Guides</h2>
+ <ul>
+ {GUIDES.map((g) => <li><a href={`/guides/${g.slug}/`}>{g.name}</a></li>)}
+ </ul>
+ <h2>About &amp; policies</h2>
+ <ul>
+ {legal.map(([href, label]) => <li><a href={href}>{label}</a></li>)}
+ </ul>
+ </section>
+</Base>

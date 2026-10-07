@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+---
+<Base
+ currentPath="/changelog/"
+ title="Changelog - What's New on HT Calculator"
+ description="Every data refresh and feature change on HT Calculator, dated. Game-data corrections are recorded here before they ship."
+ path="/changelog/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Changelog' }]}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Changelog' }]} />
+ <h1>Changelog</h1>
+ <p class="value-line">Dated, real changes only - dates never move without substance.</p>
+
+ <section class="prose">
+ <h2>2026-10-07 - Launch</h2>
+ <ul>
+ <li>Launched with four tools: <a href="/tools/crop-profit-calculator/">crop profit calculator</a> (32 crops, four quality tiers, regrow/replant modelling), <a href="/tools/animal-profit-calculator/">animal profit calculator</a> (9 animals, editable product prices), <a href="/tools/fishing-price-guide/">fishing price guide</a> (76 fish) and <a href="/tools/gift-planner/">NPC gift planner</a> (39 NPCs, 31 birthdays).</li>
+ <li>Published guides: <a href="/guides/best-crops-per-season/">best crops per season</a> and <a href="/guides/money-making-guide/">how to make money</a>.</li>
+ <li>Initial wiki data verification (2026-10-07). Known gaps flagged in the tools: four seed prices, feather/hair sell prices, some quality tiers.</li>
+ <li>Noted data conflict: Bean growth days (wiki detail page says 3, crop table says 2) - detail page used.</li>
+ </ul>
+ </section>
+</Base>

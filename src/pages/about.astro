@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE } from '../config';
+---
+<Base
+ currentPath="/about/"
+ title="About HT Calculator - Unofficial Fan Tools"
+ description="Who makes HT Calculator, why it exists, and how the Harvest Town calculators are built and kept accurate."
+ path="/about/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'About' }]}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'About' }]} />
+ <h1>About HT Calculator</h1>
+ <p class="value-line">An unofficial, player-made set of calculators for Harvest Town - built because planning a season shouldn’t need a spreadsheet.</p>
+
+ <section class="prose">
+ <h2>Why this site exists</h2>
+ <p>Harvest Town hides its economy in dozens of wiki tables. When we wanted to answer “what do I plant next week?”, we were copying numbers into a spreadsheet every season. So we built the tool we wanted: every crop, animal, fish and gift in one place, with the math visible and every assumption editable.</p>
+
+ <h2>Who makes it</h2>
+ <p>HT Calculator is maintained by a small team of Harvest Town players who build web tools for a living. We’re fans, not a company: no investor, no growth team. Pages are authored by the team and reviewed by a second player before publication - see the <a href="/methodology/">methodology page</a> for the editorial process.</p>
+
+ <h2>How it’s built</h2>
+ <ul>
+ <li><strong>Static pages, fast tools.</strong> The site is generated with Astro; every page is server-rendered HTML, and the calculators run plain JavaScript in your browser.</li>
+ <li><strong>Data pipeline.</strong> Game values are extracted from the community wiki, checked against each item’s detail page, and compiled into typed data files with the verification date stamped on every page.</li>
+ <li><strong>Open about gaps.</strong> Where the wiki lacks a number, we show “?” and let you enter your own - we never invent values.</li>
+ </ul>
+
+ <h2>How the site is funded</h2>
+ <p>It isn’t, currently - hosting costs are paid out of pocket and there are no ads. If that ever changes, the disclosure will appear here and on affected pages before any ad ships.</p>
+
+ <h2>Legal</h2>
+ <p>HT Calculator is an unofficial fan tool. We are not affiliated with, endorsed by, or sponsored by AVIDGamers or Dataverse Co., Limited. Harvest Town and its assets belong to their respective owners; item icons and NPC portraits are used for identification with credit to the <a href="https://harvest-town.fandom.com" rel="noopener">Harvest Town Wiki</a>. If you represent the rights holder and want anything changed, <a href="/contact/">contact us</a> and we’ll act promptly.</p>
+
+ <h2>Contact</h2>
+ <p>Corrections, data gaps you can fill, or feature ideas: the <a href="/contact/">contact page</a> lists the channels. Data corrections usually ship within a week.</p>
+ </section>
+</Base>

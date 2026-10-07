@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+---
+<Base
+ currentPath="/privacy/"
+ title="Privacy Policy - HT Calculator"
+ description="HT Calculator processes everything in your browser. No accounts, no uploads, no third-party trackers. The full, short policy."
+ path="/privacy/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Privacy' }]}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Privacy' }]} />
+ <h1>Privacy policy</h1>
+ <p class="value-line">Short version: the calculators run in your browser. Nothing you type is sent to us, and we don’t know who you are.</p>
+
+ <section class="prose">
+ <h2>What stays on your device</h2>
+ <p>Every calculation (crop rankings, animal payback, gift searches, filters) runs as plain JavaScript in your browser. The numbers you enter - plot counts, seed prices, anything - never leave your device. We have no accounts, no saved work server-side, and no file uploads anywhere on this site.</p>
+
+ <h2>What we collect</h2>
+ <ul>
+ <li><strong>Anonymous usage counts:</strong> a first-party script records that a tool was started or completed and which result was shown (e.g. “top crop: Biluochun”). It does not record anything you type.</li>
+ <li><strong>Standard server logs:</strong> our host records IP address and requested URLs for security and debugging, kept for a short period.</li>
+ </ul>
+
+ <h2>What we don’t do</h2>
+ <ul>
+ <li>No third-party analytics or advertising trackers by default.</li>
+ <li>No cookies needed for the tools to work; no account, no marketing emails.</li>
+ <li>No selling or sharing of personal data - we don’t have any to sell.</li>
+ </ul>
+
+ <h2>Legal bases and your rights</h2>
+ <p>Depending on where you live (GDPR, UK GDPR, CCPA, India’s DPDP Act), you may have rights to access, delete or object to processing of data about you. Since we hold no personal data beyond transient server logs, there’s usually nothing to export - but email <strong>hello@harvesttowncalc.top</strong> and we’ll help regardless.</p>
+
+ <h2>Changes</h2>
+ <p>If this policy ever changes materially (for example, if analytics or ads are added), we’ll update this page and date it, and the <a href="/changelog/">changelog</a> will record the change before it takes effect.</p>
+ <p>Last updated: 2026-10-07.</p>
+ </section>
+</Base>

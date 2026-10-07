@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { GUIDES } from '../../config';
+---
+<Base
+ currentPath="/guides/"
+ title="Harvest Town Guides | HT Calculator"
+ description="Data-backed Harvest Town guides: the best crops for every season and how to make money with crops, animals and fishing compared."
+ path="/guides/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Guides' }]}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Guides' }]} />
+ <h1>Harvest Town guides</h1>
+ <p class="value-line">Strategy guides built on the same verified wiki data as our calculators - numbers you can check.</p>
+ <div class="grid-cards">
+ {GUIDES.map((g) => (
+ <a class="tool-card" href={`/guides/${g.slug}/`}>
+ <span>
+ <span class="t">{g.name}</span>
+ <span class="d">{g.oneLiner}</span>
+ </span>
+ </a>
+ ))}
+ </div>
+</Base>

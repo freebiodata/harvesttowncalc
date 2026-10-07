@@ -1,0 +1,35 @@
+---
+import { SITE, TOOLS, GUIDES } from '../config';
+---
+<footer class="site-footer">
+ <div class="wrap">
+ <div class="cols">
+ <div>
+ <h2>{SITE.name}</h2>
+ <p>Free, unofficial fan-made calculators for the mobile game Harvest Town. Every tool runs entirely in your browser - nothing you type is sent anywhere.</p>
+ <p><a href="/contact/">Contact</a> · <a href="/changelog/">What’s new</a> · <a href="/sitemap/">HTML sitemap</a></p>
+ </div>
+ <div>
+ <h2>Tools</h2>
+ <ul>
+ {TOOLS.map((t) => <li><a href={`/tools/${t.slug}/`}>{t.name}</a></li>)}
+ </ul>
+ </div>
+ <div>
+ <h2>Guides &amp; legal</h2>
+ <ul>
+ {GUIDES.map((g) => <li><a href={`/guides/${g.slug}/`}>{g.name}</a></li>)}
+ <li><a href="/privacy/">Privacy</a></li>
+ <li><a href="/terms/">Terms</a></li>
+ <li><a href="/disclaimer/">Disclaimer</a></li>
+ </ul>
+ </div>
+ </div>
+ <p class="footer-note">
+ Unofficial fan tool. Not affiliated with, endorsed by, or sponsored by AVIDGamers or Dataverse Co., Limited.
+ Harvest Town and its game assets are © their respective owners; crop, animal, fish and portrait images are served from the
+ <a href="https://harvest-town.fandom.com" rel="noopener">Harvest Town Wiki</a> under fair use for identification.
+ Game data verified {SITE.dataVersion}.
+ </p>
+ </div>
+</footer>

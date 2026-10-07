@@ -1,0 +1,172 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import FAQ from '../../components/FAQ.astro';
+import RelatedTools from '../../components/RelatedTools.astro';
+import TrustBlock from '../../components/TrustBlock.astro';
+import { animals } from '../../data/animals';
+import { SITE } from '../../config';
+
+const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
+// Default view: 1 animal each, known product prices, no feed cost (blank = editable below).
+const rows = animals.map((a) => {
+ const known = a.products.filter((p) => p.sellBasic !== null);
+ const dailyRevenue = known.reduce((s, p) => s + (p.sellBasic ?? 0), 0);
+ const payback = dailyRevenue > 0 ? a.price / dailyRevenue : null;
+ return { a, known, dailyRevenue, payback };
+});
+const bestPayback = [...rows].filter((r) => r.payback).sort((x, y) => (x.payback! - y.payback!))[0];
+
+const faqItems = [
+ {
+ q: 'Which animal pays for itself fastest in Harvest Town?',
+ a: `With basic-quality products at published wiki prices, the <strong>${bestPayback.a.name}</strong> breaks even in about ${Math.round(bestPayback.payback!)} days (${fmt(bestPayback.a.price)} coins ÷ ${fmt(bestPayback.dailyRevenue)} coins/day). Remember animals keep producing long after payback - and rising fondness raises product quality and price.`,
+ },
+ {
+ q: 'How often do animals produce goods?',
+ a: 'Properly fed chickens, ducks, cows and goats produce once per day according to their item pages on the wiki (ducks also drop a feather daily). The calculator assumes one unit of each product per day; adjust the price cells if your breed skill or fondness changes the output.',
+ },
+ {
+ q: 'Do I have to buy feed?',
+ a: 'No. Animals eat one Poultry Feed or Livestock Feed per day, but they can also eat forage that you plant near them (forage seeds cost 3 coins at the Grocery). Enter your real feed cost in the calculator to see net profit - feed made in the Bait Workshop is cheapest.',
+ },
+ {
+ q: 'Does fondness change product prices?',
+ a: 'Yes. Petting animals daily and gifting Love Dough raises fondness, which improves product quality (and therefore price) and the animal’s own selling price. The calculator starts at basic quality - treat its numbers as the floor, not the ceiling.',
+ },
+ {
+ q: 'Why are feather prices missing?',
+ a: "The wiki's pages for Duck Feather, Goose Feather, Peacock Feather and Alpaca Hair don't publish sell prices yet (they're marked incomplete). Type what you see in-game into the price cells and the math updates instantly - and if you tell us the values, we'll bake them in for everyone.",
+ },
+ {
+ q: 'Can animals be sold for profit?',
+ a: 'Yes - the wiki notes grown animals sell for more than their purchase price, so breeding (especially Piggies, which propagate fast) is a legitimate strategy. This calculator focuses on daily product income; treat sale value as a bonus when you retire an animal.',
+ },
+];
+---
+<Base
+ currentPath="/tools/animal-profit-calculator/"
+ title="Harvest Town Animal Profit Calculator | HT Calculator"
+ description="Compare all 9 Harvest Town ranch animals: daily product income, feed costs, payback time and 28-day profit. Prices editable, math runs in your browser."
+ path="/tools/animal-profit-calculator/"
+ breadcrumbs={[
+ { name: 'Home', path: '/' },
+ { name: 'Tools', path: '/tools/' },
+ { name: 'Animal Profit Calculator' },
+ ]}
+ webApp={{
+ name: 'Harvest Town Animal Profit Calculator',
+ description: 'Compare Harvest Town ranch animals by daily product income, feed cost and payback time.',
+ }}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: 'Animal Profit Calculator' }]} />
+
+ <h1>Harvest Town Animal Profit Calculator</h1>
+ <p class="value-line">See what every ranch animal earns per day at basic quality, how many days until it pays for itself, and what a full 28-day season of product income looks like.</p>
+ <p class="trust-microline">Free · No sign-up · Runs in your browser · Wiki data verified {SITE.dataVersion}</p>
+
+ <section class="tool-panel" id="calculator" aria-label="Animal profit calculator">
+ <div class="controls">
+ <div class="field">
+ <label for="a-feed">Feed cost per animal per day (coins)</label>
+ <input type="number" id="a-feed" min="0" max="999" step="1" value="0" inputmode="numeric" />
+ <p class="hint">Bait Workshop feed is cheapest; forage grazing ≈ 3 coins. 0 = free grazing.</p>
+ </div>
+ <div class="field">
+ <label for="a-window">Days to project</label>
+ <input type="number" id="a-window" min="1" max="336" step="1" value="28" inputmode="numeric" />
+ <p class="hint">One Harvest Town season is 28 days.</p>
+ </div>
+ </div>
+
+ <div class="result-summary" aria-live="polite">
+ <div class="stat"><div class="k">Fastest payback</div><div class="v" id="a-best">{bestPayback.a.name}</div></div>
+ <div class="stat"><div class="k">Pays back in</div><div class="v" id="a-best-days">{Math.round(bestPayback.payback!)} d</div></div>
+ <div class="stat"><div class="k">Best daily profit</div><div class="v" id="a-top-daily">{fmt(bestPayback.dailyRevenue)}</div></div>
+ </div>
+ <p class="muted" id="a-note">Basic-quality product prices, no feed cost. Edit any price cell to match your game - totals update instantly.</p>
+
+ <div class="table-scroll">
+ <table class="data" id="animal-table">
+ <thead>
+ <tr>
+ <th scope="col">Animal</th>
+ <th scope="col">Buy price</th>
+ <th scope="col">Building</th>
+ <th scope="col">Products / day (coins)</th>
+ <th scope="col" class="num">Revenue / day</th>
+ <th scope="col" class="num">Profit / day</th>
+ <th scope="col" class="num">Payback</th>
+ <th scope="col" class="num" title="Product profit minus feed cost and the buy price">Net over window</th>
+ </tr>
+ </thead>
+ <tbody id="animal-tbody">
+ {rows.map(({ a, known, dailyRevenue, payback }, i) => (
+ <tr class={i < 3 ? 'top' : ''}>
+ <td>
+ <span class="item-cell">
+ <img src={`/icons/${a.icon}`} width="32" height="32" alt={`${a.name} icon`} loading={i < 9 ? 'eager' : 'lazy'} />
+ <span>{a.name}</span>
+ </span>
+ </td>
+ <td class="num">{fmt(a.price)}</td>
+ <td class="muted">{a.building}</td>
+ <td>
+ {a.products.length === 0
+ ? <span class="muted">breeder (no product)</span>
+ : a.products.map((p) => (
+ <span class="item-cell" style="display:inline-flex; margin-right:10px;">
+ <label class="visually-hidden" for={`p-${a.name.replace(/[^a-z0-9]/gi, '')}-${p.name.replace(/[^a-z0-9]/gi, '')}`}>{p.name} sell price for {a.name}</label>
+ <input
+ type="number" min="0" max="9999" step="1" value={p.sellBasic ?? ''}
+ placeholder={p.sellBasic === null ? `${p.name}: not on wiki` : undefined}
+ data-animal={a.name} data-product={p.name}
+ style="width:110px; min-height:36px; padding:4px 8px; margin-right:6px;"
+ id={`p-${a.name.replace(/[^a-z0-9]/gi, '')}-${p.name.replace(/[^a-z0-9]/gi, '')}`}
+ />
+ <span class="muted">{p.name}{p.sellBasic === null ? ' ?' : ''}</span>
+ </span>
+ ))}
+ </td>
+ <td class="num">{known.length ? fmt(dailyRevenue) : '-'}</td>
+ <td class="num">{known.length ? fmt(dailyRevenue) : '-'}</td>
+ <td class="num">{payback ? `${Math.round(payback)} d` : '-'}</td>
+ <td class="num">{known.length ? fmt(dailyRevenue * 28 - a.price) : '-'}</td>
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ <p class="muted">“?” = sell price not published on the wiki; type the value you see at the stall. Piggy produces no goods - it’s a breeding animal (sells for more than 800 coins when grown).</p>
+ </section>
+
+ <section class="prose">
+ <h2>How to use the animal calculator</h2>
+ <ol>
+ <li><strong>Set your feed cost</strong> per animal per day - 0 if you graze them on forage, or what feed actually costs you.</li>
+ <li><strong>Fix any “?” cells</strong>: feather and hair prices aren’t on the wiki yet; type the in-game value.</li>
+ <li><strong>Compare payback and daily profit</strong> across animals before spending coins at the Ranch.</li>
+ <li><strong>Choose your window</strong>: 28 days = one season; longer windows reward slow-but-rich animals.</li>
+ </ol>
+
+ <h2>What this calculator does differently</h2>
+ <ul>
+ <li><strong>Payback time, not just revenue</strong> - a 500-coin chicken and a 2,800-coin peacock are hard to compare head-to-head until you see days-to-break-even.</li>
+ <li><strong>Every product counted</strong>: ducks and geese lay eggs <em>and</em> drop feathers; most tools count only one.</li>
+ <li><strong>Honest gaps</strong>: unpublished wiki prices are editable inputs, never invented numbers.</li>
+ <li><strong>Feed economics built in</strong>, including the free-grazing option the game allows.</li>
+ </ul>
+
+ <h2>How this calculator works</h2>
+ <p><strong>Data.</strong> Animal prices, buildings and feed types come from the wiki’s <a href="https://harvest-town.fandom.com/wiki/Livestock" rel="noopener">Livestock page</a>; product prices and per-day rates from each product’s item page (an egg, milk jar or feather per day when fed), verified {SITE.dataVersion}.</p>
+ <p><strong>Formula.</strong> Revenue/day = sum of (products per day × sell price). Profit/day = revenue - feed cost. Payback = buy price ÷ profit/day. Window profit = profit/day × days - 0 (the buy price is counted in payback, not subtracted from product income, so the number stays comparable with the crop calculator).</p>
+ <p><strong>Limitations.</strong> (1) Basic-quality prices only as defaults - fondness and Breed skill raise both quality and price, so treat results as a floor. (2) Product rate is 1/day per product per wiki text; if a game update changes rates, the cells won’t know. (3) Animal sale value when grown isn’t modelled. (4) Building upgrade costs (Barn/Poultry House levels) aren’t included - check the building cost before committing to luxury pens.</p>
+
+ <FAQ items={faqItems} />
+ <RelatedTools current="animal-profit-calculator" />
+ <TrustBlock toolName="Animal Profit Calculator" feedbackSubject="Animal calculator data issue" />
+ </section>
+</Base>
+
+<script type="application/json" id="animal-data" set:html={JSON.stringify(animals)} />
+<script src="../../scripts/animal-calculator.ts"></script>

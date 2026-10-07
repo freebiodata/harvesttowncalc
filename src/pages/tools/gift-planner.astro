@@ -1,0 +1,194 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import FAQ from '../../components/FAQ.astro';
+import RelatedTools from '../../components/RelatedTools.astro';
+import TrustBlock from '../../components/TrustBlock.astro';
+import { npcs } from '../../data/npcs';
+import { SITE } from '../../config';
+
+// Default NPC shown in the crawlable initial state
+const first = npcs[0];
+const groups = [...new Set(npcs.map((n) => n.group))];
+
+// Reverse index: item -> who favors / likes / dislikes it
+interface ItemEntry { item: string; favorites: string[]; likes: string[]; dislikes: string[] }
+const itemMap = new Map<string, ItemEntry>();
+for (const n of npcs) {
+ for (const it of n.favorites) {
+ const e = itemMap.get(it) || { item: it, favorites: [], likes: [], dislikes: [] };
+ e.favorites.push(n.name); itemMap.set(it, e);
+ }
+ for (const it of n.likes) {
+ const e = itemMap.get(it) || { item: it, favorites: [], likes: [], dislikes: [] };
+ e.likes.push(n.name); itemMap.set(it, e);
+ }
+ for (const it of n.dislikes) {
+ const e = itemMap.get(it) || { item: it, favorites: [], likes: [], dislikes: [] };
+ e.dislikes.push(n.name); itemMap.set(it, e);
+ }
+}
+const items = [...itemMap.values()].sort((a, b) => b.favorites.length - a.favorites.length || a.item.localeCompare(b.item));
+const mostLoved = items.filter((i) => i.favorites.length >= 2).slice(0, 10);
+
+// Birthday calendar (all 31 birthdays, server-rendered)
+const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
+const bdays = (s: string) => npcs.filter((n) => n.birthday?.startsWith(s)).sort((a, b) => parseInt(a.birthday!.split(' ')[1]) - parseInt(b.birthday!.split(' ')[1]));
+
+const faqItems = [
+ {
+ q: 'How much fondness does a gift give in Harvest Town?',
+ a: 'According to the wiki’s gift table: favorite items give about <strong>+87 to +92</strong> fondness, liked items about <strong>+43 to +47</strong>, and disliked items <strong>-10</strong>. Neutral items (not on any list) give a small amount, and Garbage is a universal +1-2 gift that still counts for daily gifting tasks.',
+ },
+ {
+ q: 'Do birthday gifts give extra fondness?',
+ a: 'Yes - birthday gifts give <strong>double</strong> the usual fondness. Check the birthday calendar below and save your best gift for that date.',
+ },
+ {
+ q: 'How do I give a gift?',
+ a: 'Hold the item in your hand (tap it in your bag), then talk to the NPC - the “This is for you…” option appears. One gift per NPC per day is the practical rule; the wiki notes gifting works via the hand-hold interaction.',
+ },
+ {
+ q: 'What should I give someone whose favorites I can’t make yet?',
+ a: 'Work down the list: favorites first (cooked or crafted items often can’t be rushed early game), then likes - usually easier ingredients like Ginseng or cloth. As a general rule the wiki notes that things you grew, cooked or crafted yourself, plus nice wild fruits, are safe gifts for almost everyone.',
+ },
+ {
+ q: 'Which gifts do the most NPCs love?',
+ a: `The most widely favored gifts in the current data: ${mostLoved.slice(0, 5).map((i) => `<strong>${i.item}</strong> (${i.favorites.length} NPCs)`).join(', ')}. Search any item in “Who wants this item?” mode to see exactly who wants it.`,
+ },
+ {
+ q: 'Why do some NPCs have no favorites listed?',
+ a: 'The wiki’s gift table is community-maintained and still has gaps (a few Monster NPCs and children). Empty lists here mirror the wiki exactly rather than guessing - check back after wiki updates, or send us what you observe in-game.',
+ },
+];
+---
+<Base
+ currentPath="/tools/gift-planner/"
+ title="Harvest Town Gift Guide: NPC Favorites | HT Calculator"
+ description="Every Harvest Town NPC’s favorite, liked and disliked gifts, plus all 31 birthdays. Search an item to see who wants it before you give it away."
+ path="/tools/gift-planner/"
+ breadcrumbs={[
+ { name: 'Home', path: '/' },
+ { name: 'Tools', path: '/tools/' },
+ { name: 'NPC Gift Planner' },
+ ]}
+ webApp={{
+ name: 'Harvest Town Gift Planner',
+ description: 'Look up Harvest Town NPC gift preferences and birthdays, or search an item to see who wants it.',
+ }}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: 'NPC Gift Planner' }]} />
+
+ <h1>Harvest Town Gift Planner</h1>
+ <p class="value-line">Look up any NPC’s favorite gifts and birthday - or search the item in your hand to see exactly who wants it (and who hates it) before you give it away.</p>
+ <p class="trust-microline">Free · No sign-up · Runs in your browser · Wiki data verified {SITE.dataVersion}</p>
+
+ <section class="tool-panel" id="planner" aria-label="NPC gift planner">
+ <div class="controls">
+ <div class="field">
+ <label for="g-mode">Mode</label>
+ <select id="g-mode">
+ <option value="npc" selected>Gifts for an NPC</option>
+ <option value="item">Who wants this item?</option>
+ </select>
+ </div>
+ <div class="field" id="g-npc-field">
+ <label for="g-npc">NPC</label>
+ <select id="g-npc">
+ {groups.map((g) => (
+ <optgroup label={g}>
+ {npcs.filter((n) => n.group === g).map((n) => (
+ <option value={n.name} selected={n.name === first.name}>{n.name}{n.birthday ? ` - ${n.birthday}` : ''}</option>
+ ))}
+ </optgroup>
+ ))}
+ </select>
+ </div>
+ <div class="field" id="g-item-field" hidden>
+ <label for="g-item">Item</label>
+ <input type="text" id="g-item" list="g-items" placeholder="e.g. Spicy Crab" autocomplete="off" />
+ <datalist id="g-items">
+ {items.map((i) => <option value={i.item}>{`${i.favorites.length} love it`}</option>)}
+ </datalist>
+ <p class="hint">{items.length} known gift items - favorites, likes and dislikes.</p>
+ </div>
+ </div>
+
+ <div id="g-result">
+ <div style="display:flex; align-items:center; gap:14px; margin:10px 0 14px;">
+ <img src={`/icons/${first.portrait}`} width="72" height="72" alt={`${first.name} portrait`} style="border-radius:10px; background:var(--cream-dark);" />
+ <div>
+ <h2 style="margin:0;" id="g-name">{first.name}</h2>
+ <p class="muted" style="margin:0;" id="g-meta">{first.group}{first.birthday ? ` · 🎂 Birthday: ${first.birthday}` : ''} · Fondness: favorites +87~92, likes +43~47</p>
+ </div>
+ </div>
+ <div class="grid-cards" id="g-lists">
+ <div class="tool-card" style="display:block;">
+ <p><strong>❤️ Favorites (+87~92)</strong></p>
+ <p>{first.favorites.length ? first.favorites.join(', ') : 'Not documented on the wiki yet'}</p>
+ </div>
+ <div class="tool-card" style="display:block;">
+ <p><strong>👍 Likes (+43~47)</strong></p>
+ <p>{first.likes.length ? first.likes.join(', ') : 'Not documented yet'}</p>
+ </div>
+ <div class="tool-card" style="display:block;">
+ <p><strong>👎 Dislikes (-10)</strong></p>
+ <p>{first.dislikes.length ? first.dislikes.join(', ') : 'None documented'}</p>
+ </div>
+ {first.questItems.length > 0 && (
+ <div class="tool-card" style="display:block;">
+ <p><strong>📦 Quest items</strong></p>
+ <p>{first.questItems.join(', ')}</p>
+ </div>
+ )}
+ </div>
+ </div>
+ </section>
+
+ <section class="prose">
+ <h2>Harvest Town birthday calendar</h2>
+ <p>Birthday gifts give <strong>double fondness</strong> - plan gifts around these dates. Each season is 28 days.</p>
+ <div class="table-scroll">
+ <table class="data">
+ <thead><tr><th>Season</th><th>Day</th><th>NPC</th></tr></thead>
+ <tbody>
+ {seasons.flatMap((s) => bdays(s).map((n) => (
+ <tr>
+ <td><span class={`chip season-${s.toLowerCase()}`}>{s}</span></td>
+ <td class="num">{n.birthday!.split(' ')[1]}</td>
+ <td><span class="item-cell"><img src={`/icons/${n.portrait}`} width="32" height="32" alt={`${n.name} portrait`} loading="lazy" />{n.name}</span></td>
+ </tr>
+ )))}
+ </tbody>
+ </table>
+ </div>
+
+ <h2>Most-loved gifts across town</h2>
+ <p>Give these when you need a safe crowd-pleaser:</p>
+ <div class="table-scroll">
+ <table class="data">
+ <thead><tr><th>Gift</th><th class="num">NPCs who list it as a favorite</th></tr></thead>
+ <tbody>
+ {mostLoved.map((i) => (
+ <tr>
+ <td>{i.item}</td>
+ <td class="num"><strong>{i.favorites.length}</strong> - {i.favorites.join(', ')}</td>
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+
+ <h2>How this planner works</h2>
+ <p><strong>Data.</strong> Gift preferences come from the wiki’s <a href="https://harvest-town.fandom.com/wiki/NPC_Gifts_Table" rel="noopener">NPC Gifts Table</a> and birthdays from its <a href="https://harvest-town.fandom.com/wiki/Birthdays" rel="noopener">Birthdays calendar</a>, verified {SITE.dataVersion}. Fondness values are the ranges the wiki publishes (+87~92 favorites, +43~47 likes, -10 dislikes, ×2 on birthdays).</p>
+ <p><strong>How to read it.</strong> “Gifts for an NPC” shows one villager’s full preference card. “Who wants this item?” searches every NPC’s lists at once - useful before regifting or spending a rare item. Quest items are the things NPCs ask you to fetch for story quests, listed for completeness.</p>
+ <p><strong>Limitations.</strong> (1) The wiki table has gaps (some NPCs lack favorites); we show the gaps rather than inventing data. (2) New NPCs and events can change lists - we re-sync after wiki updates and note them in the <a href="/changelog/">changelog</a>. (3) Romance-specific gift rules (e.g. bouquets) aren’t in this dataset.</p>
+
+ <FAQ items={faqItems} />
+ <RelatedTools current="gift-planner" />
+ <TrustBlock toolName="NPC Gift Planner" feedbackSubject="Gift planner data issue" />
+ </section>
+</Base>
+
+<script type="application/json" id="npc-data" set:html={JSON.stringify(npcs)} />
+<script src="../../scripts/gift-planner.ts"></script>

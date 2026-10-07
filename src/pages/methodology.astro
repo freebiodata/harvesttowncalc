@@ -1,0 +1,59 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE } from '../config';
+---
+<Base
+ currentPath="/methodology/"
+ title="Methodology & Data Sources - HT Calculator"
+ description="Every formula, assumption and data source behind the Harvest Town calculators, plus the editorial and correction process."
+ path="/methodology/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Methodology' }]}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Methodology' }]} />
+ <h1>Methodology and data sources</h1>
+ <p class="value-line">Every number on this site traces to a source; every formula is printed here. Last full data verification: {SITE.dataVersion}.</p>
+
+ <section class="prose">
+ <h2>Data sources</h2>
+ <p>All game values come from the community-maintained Harvest Town Wiki, cross-checked between summary tables and each item’s detail page (where the two disagreed, the detail page won and the conflict is noted in the data):
+ {SITE.dataSources.map((s) => (<span><a href={s.url} rel="noopener">{s.label}</a>; </span>))}
+ verified {SITE.dataVersion}.</p>
+ <p><strong>Known gaps</strong> (shown as “?” in the tools, never invented): seed prices for Wheat, Tomato, Sunflower and Napa Cabbage; sell prices for Duck/Goose/Peacock feathers and Alpaca Hair; several Good/Great price tiers; unlock levels marked “TBA”; per-star fish prices.</p>
+
+ <h2>Crop profit formula</h2>
+ <p>For each crop, one field plot is simulated across your time window:</p>
+ <ol>
+ <li>Plant (costs one seed). Wait <em>growthDays</em>. Harvest once.</li>
+ <li>Multi-harvest crops then regrow every <em>regrowDays</em> (from the crop’s wiki page, e.g. “harvested again every 2 days for up to 5 times”) until the harvest cap.</li>
+ <li>When the crop is exhausted (or immediately for single-harvest crops), replant if <em>growthDays</em> still fit in the window.</li>
+ </ol>
+ <p>Profit = harvests × sell price (chosen quality tier) - plantings × seed price. Gold/day = profit ÷ days in your window. Totals scale linearly with plot count. If a quality tier is missing on the wiki, the base price is used and flagged.</p>
+
+ <h2>Animal profit formula</h2>
+ <p>Revenue/day = Σ(products per day × sell price). Products are assumed at one unit per day per the wiki’s item pages (e.g. “produce a chicken egg once a day”). Profit/day = revenue - feed cost (your input; grazing can be free). Payback = buy price ÷ profit/day. Net over window = profit/day × days - buy price. All prices default to basic quality - a floor, since fondness and Breed skill raise quality.</p>
+
+ <h2>Fishing values</h2>
+ <p>Prices, locations, seasons, times, weather, bait, levels and exp are the wiki’s published base values. Coins per XP = price ÷ exp. Catch rates per cast are not published anywhere, so expected value per bait cannot be computed honestly - we don’t.</p>
+
+ <h2>Gift data</h2>
+ <p>Favorites, likes, dislikes and quest items mirror the wiki’s NPC Gifts Table (fondness +87~92 / +43~47 / -10; birthdays ×2). Birthdays come from the wiki’s calendar. Gaps are shown as gaps.</p>
+
+ <h2>Editorial process</h2>
+ <ul>
+ <li><strong>Authorship:</strong> pages are drafted by the team, including AI assistance for structure and copyediting, then reviewed and corrected by a second player who plays Harvest Town; a human owns every published page.</li>
+ <li><strong>Verification:</strong> data is re-checked against the wiki at least monthly and after known game updates. Every change is recorded in the <a href="/changelog/">changelog</a> - dates change only with substantive updates.</li>
+ <li><strong>Corrections:</strong> reported errors are fixed within about a week and noted in the changelog. Report via <a href="/contact/">contact</a>.</li>
+ </ul>
+
+ <h2>Measurement</h2>
+ <p>We count anonymous usage events (tool started, tool completed, top result) with a first-party script to learn which tools help; no personal data, no third-party trackers by default, nothing you type is transmitted. Details: <a href="/privacy/">privacy policy</a>.</p>
+
+ <h2>Limitations, honestly</h2>
+ <ul>
+ <li>The wiki itself can lag behind game updates; we inherit its errors until they’re fixed upstream or reported to us.</li>
+ <li>Scale Powder, fertilizers, workshop recipes, Logistics Hub orders and event crops are not modelled.</li>
+ <li>The wiki’s own crop ranking (“order” column) uses unpublished harvest assumptions, so our computed gold/day can differ slightly from it.</li>
+ </ul>
+ </section>
+</Base>

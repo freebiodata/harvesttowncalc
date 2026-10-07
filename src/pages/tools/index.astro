@@ -1,0 +1,81 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import FAQ from '../../components/FAQ.astro';
+import { TOOLS, SITE } from '../../config';
+
+const chooser = [
+ { task: 'Deciding what to plant this season', tool: 'Crop Profit Calculator', href: '/tools/crop-profit-calculator/' },
+ { task: 'Planning a greenhouse layout', tool: 'Crop Profit Calculator (All seasons)', href: '/tools/crop-profit-calculator/' },
+ { task: 'Deciding which animal to buy at the Ranch', tool: 'Animal Profit Calculator', href: '/tools/animal-profit-calculator/' },
+ { task: 'Choosing where to fish or what bait to craft', tool: 'Fishing Price Guide', href: '/tools/fishing-price-guide/' },
+ { task: 'Raising fondness with a villager fast', tool: 'NPC Gift Planner', href: '/tools/gift-planner/' },
+ { task: 'Remembering whose birthday is coming', tool: 'NPC Gift Planner (birthday calendar)', href: '/tools/gift-planner/' },
+];
+
+const faqItems = [
+ {
+ q: 'Are these Harvest Town calculators free?',
+ a: 'Yes - every tool on this site is free, needs no sign-up, and runs entirely in your browser. Nothing you type leaves your device.',
+ },
+ {
+ q: 'Where does the game data come from?',
+ a: `From the community-maintained <a href="https://harvest-town.fandom.com" rel="noopener">Harvest Town Wiki</a>, last verified ${SITE.dataVersion}. Where the wiki has gaps we say so and let you type your own values - we never invent numbers. See the <a href="/methodology/">methodology page</a> for every formula and source.`,
+ },
+ {
+ q: 'Do the calculators work on mobile?',
+ a: 'Yes. The site is built mobile-first for phone play sessions - tables scroll horizontally if needed and every control is sized for touch.',
+ },
+ {
+ q: 'Will numbers change when the game updates?',
+ a: 'Possibly. We re-verify against the wiki regularly and record every data change in the <a href="/changelog/">changelog</a> with the date it shipped.',
+ },
+];
+---
+<Base
+ currentPath="/tools/"
+ title="Harvest Town Tools & Calculators | HT Calculator"
+ description="All free Harvest Town tools: crop profit calculator, animal payback calculator, fish price guide and NPC gift planner. No sign-up, runs in your browser."
+ path="/tools/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Tools' }]}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools' }]} />
+
+ <h1>Harvest Town tools &amp; calculators</h1>
+ <p class="value-line">Free calculators built on verified wiki data - crops, ranch animals, fishing and NPC gifts. Pick a tool and get an answer in seconds.</p>
+
+ <div class="grid-cards">
+ {TOOLS.map((t) => (
+ <a class="tool-card" href={`/tools/${t.slug}/`}>
+ <img src={`/icons/${t.icon}`} width="48" height="48" alt="" loading="lazy" />
+ <span>
+ <span class="t">{t.name}</span>
+ <span class="d">{t.oneLiner}</span>
+ </span>
+ </a>
+ ))}
+ </div>
+
+ <section class="prose">
+ <h2>Which tool do I need?</h2>
+ <div class="table-scroll">
+ <table class="data">
+ <thead><tr><th>If you want to…</th><th>Use</th></tr></thead>
+ <tbody>
+ {chooser.map((c) => (
+ <tr><td>{c.task}</td><td><a href={c.href}>{c.tool}</a></td></tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+
+ <h2>What all four tools share</h2>
+ <ul>
+ <li><strong>Verified data:</strong> every number traces to the Harvest Town Wiki, with the verification date shown on each page.</li>
+ <li><strong>Honest gaps:</strong> when the wiki doesn’t publish a value, the tool says so and lets you enter your own.</li>
+ <li><strong>Private by design:</strong> all math runs in your browser; there is no account, no upload, no tracking beyond anonymous usage counts.</li>
+ </ul>
+
+ <FAQ items={faqItems} heading="Tools FAQ" />
+ </section>
+</Base>

@@ -1,0 +1,167 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import FAQ from '../../components/FAQ.astro';
+import RelatedTools from '../../components/RelatedTools.astro';
+import TrustBlock from '../../components/TrustBlock.astro';
+import { fish } from '../../data/fish';
+import { SITE } from '../../config';
+
+const fmt = (n: number) => n.toLocaleString('en-US');
+const locations = [...new Set(fish.map((f) => f.location))];
+const byValue = [...fish].sort((a, b) => b.price - a.price);
+const bestValue = byValue[0];
+const bestEfficiency = [...fish].filter((f) => f.exp > 0).sort((a, b) => b.price / b.exp - a.price / a.exp)[0];
+
+const faqItems = [
+ {
+ q: 'Which fish sells for the most in Harvest Town?',
+ a: `The <strong>${bestValue.name}</strong> at <strong>${fmt(bestValue.price)} coins</strong> (base price, caught at ${bestValue.location} with ${bestValue.bait}, fishing level ${bestValue.level}). Fish kings are the jackpot catches - everything else on the table is steady income.`,
+ },
+ {
+ q: 'Which fish is best for leveling fishing skill?',
+ a: `Efficiency (coins per point of fishing exp) is how to compare bait value: <strong>${bestEfficiency.name}</strong> leads at about ${(bestEfficiency.price / bestEfficiency.exp).toFixed(1)} coins per XP. If you only care about speed to the next level, sort the table by Fishing exp and fish the highest-exp species you can catch.`,
+ },
+ {
+ q: 'Do I need bait to catch fish?',
+ a: 'No - but fishing without bait makes catches take longer, lowers catch rates and increases junk. Each species lists its preferred bait (Primary, Middle, Juicy or Fish King bait); matching the bait to the species is the reliable strategy according to the wiki.',
+ },
+ {
+ q: 'Where do I catch each fish?',
+ a: 'The Location column shows the exact spot: Manor River, Town River, Eastern Town lake, Mountain Top, Beach, the Reef/Abyssal sand, Abandoned Factory, Occult Cave and the Swamp. Filter by location to plan a trip.',
+ },
+ {
+ q: 'Do fish prices change with quality?',
+ a: 'The wiki publishes base prices only for fish. Catch quality stars exist, but per-tier fish prices haven’t been documented - treat the values here as minimums and tell us if you see higher tiers in-game.',
+ },
+ {
+ q: 'What are the Fish Kings?',
+ a: 'Seven ancient fish kings (one per water type) are rare, level-40+ catches with huge prices - the River Fish King alone sells for 5,732 coins. They need special “Bait for Fish King” and often rain or a narrow time window; the table shows each one’s exact conditions.',
+ },
+];
+---
+<Base
+ currentPath="/tools/fishing-price-guide/"
+ title="Harvest Town Fish Prices & Locations | HT Calculator"
+ description="Every Harvest Town fish with sell price, location, season, time, weather, bait and fishing level. Filter by spot or season; sort by value or coins per XP."
+ path="/tools/fishing-price-guide/"
+ breadcrumbs={[
+ { name: 'Home', path: '/' },
+ { name: 'Tools', path: '/tools/' },
+ { name: 'Fishing Price Guide' },
+ ]}
+ webApp={{
+ name: 'Harvest Town Fishing Price Guide',
+ description: 'All Harvest Town fish with sell prices, locations, seasons, bait and coins per XP efficiency.',
+ }}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: 'Fishing Price Guide' }]} />
+
+ <h1>Harvest Town Fish Price Guide</h1>
+ <p class="value-line">All {fish.length} fish with sell prices, catch locations, seasons, times, bait and coins-per-XP efficiency - filter and sort to plan your next cast.</p>
+ <p class="trust-microline">Free · No sign-up · Runs in your browser · Wiki data verified {SITE.dataVersion}</p>
+
+ <section class="tool-panel" id="calculator" aria-label="Fish price guide">
+ <div class="controls">
+ <div class="field">
+ <label for="fi-loc">Location</label>
+ <select id="fi-loc">
+ <option value="All" selected>All locations</option>
+ {locations.map((l) => <option value={l}>{l}</option>)}
+ </select>
+ </div>
+ <div class="field">
+ <label for="fi-season">Season</label>
+ <select id="fi-season">
+ <option value="All" selected>All seasons</option>
+ <option>Spring</option><option>Summer</option><option>Autumn</option><option>Winter</option>
+ </select>
+ </div>
+ <div class="field">
+ <label for="fi-level">Your fishing level</label>
+ <input type="number" id="fi-level" min="0" max="99" step="1" value="" placeholder="e.g. 10" inputmode="numeric" />
+ <p class="hint">Hides fish above your level.</p>
+ </div>
+ <div class="field">
+ <label for="fi-sort">Sort by</label>
+ <select id="fi-sort">
+ <option value="price" selected>Price (high → low)</option>
+ <option value="eff">Coins per XP (high → low)</option>
+ <option value="exp">Fishing exp (high → low)</option>
+ <option value="name">Name (A → Z)</option>
+ </select>
+ </div>
+ </div>
+
+ <div class="result-summary" aria-live="polite">
+ <div class="stat"><div class="k">Fish shown</div><div class="v" id="fi-count">{fish.length}</div></div>
+ <div class="stat"><div class="k">Top value</div><div class="v" id="fi-top">{fmt(bestValue.price)}</div></div>
+ <div class="stat"><div class="k">Best coins/XP</div><div class="v" id="fi-eff">{(bestEfficiency.price / bestEfficiency.exp).toFixed(1)}</div></div>
+ </div>
+ <p class="muted" id="fi-note">Base prices as published on the wiki. Star-quality fish prices are not yet documented.</p>
+
+ <div class="table-scroll">
+ <table class="data" id="fish-table">
+ <thead>
+ <tr>
+ <th scope="col">Fish</th>
+ <th scope="col">Location</th>
+ <th scope="col">Seasons</th>
+ <th scope="col">Time</th>
+ <th scope="col">Weather</th>
+ <th scope="col">Bait</th>
+ <th scope="col" class="num">Level</th>
+ <th scope="col" class="num">Price</th>
+ <th scope="col" class="num">Exp</th>
+ <th scope="col" class="num">Coins/XP</th>
+ </tr>
+ </thead>
+ <tbody id="fish-tbody">
+ {byValue.map((f, i) => (
+ <tr class={i < 3 ? 'top' : ''}>
+ <td><span class="item-cell"><img src={`/icons/${f.icon}`} width="32" height="32" alt={`${f.name} icon`} loading={i < 12 ? 'eager' : 'lazy'} />{f.name}</span></td>
+ <td class="muted">{f.location}</td>
+ <td>{f.seasons.length ? f.seasons.join(', ') : 'Any'}</td>
+ <td class="muted">{f.time}</td>
+ <td class="muted">{f.weather}</td>
+ <td>{f.bait}</td>
+ <td class="num">{f.level}</td>
+ <td class="num"><strong>{fmt(f.price)}</strong></td>
+ <td class="num">{f.exp}</td>
+ <td class="num">{f.exp ? (f.price / f.exp).toFixed(1) : '-'}</td>
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ </section>
+
+ <section class="prose">
+ <h2>How to use the fish price guide</h2>
+ <ol>
+ <li><strong>Filter by location</strong> you have access to - Manor River is available from the start; the Reef, Occult Cave and Swamp come later.</li>
+ <li><strong>Filter by season</strong> so you don’t plan around fish that won’t bite for months.</li>
+ <li><strong>Set your fishing level</strong> to hide out-of-reach species, and check the bait column before you craft.</li>
+ <li><strong>Sort by coins per XP</strong> for the best value per cast, or by price for pure money goals.</li>
+ </ol>
+
+ <h2>What makes this guide different</h2>
+ <ul>
+ <li><strong>Coins-per-XP efficiency</strong> - the number that actually decides whether a catch is worth its bait, not just the sticker price.</li>
+ <li><strong>Catch conditions in one table:</strong> location, season, time window, weather requirement, bait and level for every fish.</li>
+ <li><strong>No paging, no pop-ups</strong> - the full table is right here, filterable in one tap.</li>
+ </ul>
+
+ <h2>How this guide works</h2>
+ <p><strong>Data.</strong> Fish species, locations, seasons, times, weather, bait, fishing levels, base prices and exp values come from the wiki’s <a href="https://harvest-town.fandom.com/wiki/Fish" rel="noopener">Fish page</a>, verified {SITE.dataVersion}. Prices are base quality; star-quality fish prices are undocumented on the wiki.</p>
+ <p><strong>Formula.</strong> Coins per XP = price ÷ fishing exp. It’s the honest way to compare a cheap high-exp catch against a rare low-exp trophy when you’re also leveling the skill.</p>
+ <p><strong>Limitations.</strong> (1) Catch rates per cast aren’t published, so expected value per bait can’t be computed. (2) Prices are base quality only. (3) The Stall in the Courtyard sells some fish for coins - buying prices aren’t included here.</p>
+
+ <FAQ items={faqItems} />
+ <RelatedTools current="fishing-price-guide" />
+ <TrustBlock toolName="Fishing Price Guide" feedbackSubject="Fishing guide data issue" />
+ </section>
+</Base>
+
+<script type="application/json" id="fish-data" set:html={JSON.stringify(fish)} />
+<script src="../../scripts/fishing-guide.ts"></script>

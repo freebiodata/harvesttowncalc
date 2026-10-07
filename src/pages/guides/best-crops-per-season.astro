@@ -1,0 +1,96 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import RelatedTools from '../../components/RelatedTools.astro';
+import TrustBlock from '../../components/TrustBlock.astro';
+import { crops } from '../../data/crops';
+import { rankCrops } from '../../utils/crop-math';
+import { SITE } from '../../config';
+
+const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
+const seasonTable = (season: string) =>
+ rankCrops(crops, { season, days: 28, quality: 'best', maxUnlock: null }).slice(0, 6);
+
+const seasons = [
+ { name: 'Spring', note: 'Tea season: Biluochun and Longjing unlock at Manor 19 and out-earn everything else.' },
+ { name: 'Summer', note: 'Maojian tea leads once unlocked at Manor 30; corn and wax gourd are strong multi-harvest picks.' },
+ { name: 'Autumn', note: 'Cotton is the steady earner; Clivia is the highest single price but slower overall.' },
+ { name: 'Winter', note: 'Tea again: Jinjunmei and Pu’er are the whole winter economy.' },
+];
+
+const faq = [
+ { q: 'What is the single best crop in Harvest Town?', a: 'Jinjunmei (winter tea) - the wiki’s own ranking puts it first at ~21.6 gold/day at gold quality, and it’s also the best greenhouse crop year-round.' },
+ { q: 'What should I plant before I unlock tea (Manor level 19)?', a: 'Spring: strawberries (Lv 12) and beans; the calculator’s Manor-level filter shows your exact best options.' },
+ { q: 'Are flowers worth growing?', a: 'Not for raw coins at Best quality they trail tea - but roses and tulips are loved gifts (check the gift planner), and lavender/goldenrod feed hive nectar production.' },
+];
+---
+<Base
+ currentPath="/guides/best-crops-per-season/"
+ title="Best Crops per Season - Harvest Town | HT Calculator"
+ description="Every season’s most profitable Harvest Town crops ranked by gold per day at Best quality, with unlock levels, growth days and season totals from wiki data."
+ path="/guides/best-crops-per-season/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Guides', path: '/guides/' }, { name: 'Best Crops per Season' }]}
+ article={{
+ headline: 'The Best Crops for Every Season in Harvest Town',
+ datePublished: '2026-10-07',
+ dateModified: SITE.dataVersion,
+ authorName: 'HT Calculator team',
+ }}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Guides', path: '/guides/' }, { name: 'Best Crops per Season' }]} />
+
+ <h1>The best crops for every season in Harvest Town</h1>
+ <p class="value-line">Season-by-season rankings by gold per field-day at Best (purple star) quality, computed from verified wiki prices - including regrowth, replanting and seed costs.</p>
+ <p class="trust-microline">By the HT Calculator team · Updated {SITE.dataVersion} · Data: Harvest Town Wiki</p>
+
+ <section class="prose">
+ <h2>Quick answer</h2>
+ <p>Plant tea. <strong>Biluochun</strong> wins spring (~{seasonTable('Spring')[0].profitPerDay.toFixed(1)} gold/day), <strong>Maojian</strong> wins summer, <strong>Cotton</strong> tops autumn, and <strong>Jinjunmei</strong> - the best crop in the game - owns winter. Before Manor level 19, grow <strong>strawberries</strong> (spring), <strong>peanuts and watermelon</strong> (summer), and <strong>radishes or sunflower</strong> (autumn, level permitting).</p>
+
+ {seasons.map((s) => (
+ <>
+ <h2 id={s.name.toLowerCase()}>Best {s.name} crops <a href={`#${s.name.toLowerCase()}`} class="muted" aria-label="Link to section">#</a></h2>
+ <p>{s.note}</p>
+ <div class="table-scroll">
+ <table class="data">
+ <thead><tr><th>Crop</th><th class="num">Grow (d)</th><th class="num">Regrow (d)</th><th class="num">Harvests</th><th class="num">Seed</th><th class="num">Season profit</th><th class="num">Gold/day</th><th class="num">Unlock</th></tr></thead>
+ <tbody>
+ {seasonTable(s.name).map((p, i) => (
+ <tr class={i === 0 ? 'top' : ''}>
+ <td><span class="item-cell"><img src={`/icons/${p.crop.icon}`} width="32" height="32" alt={`${p.crop.name} icon`} loading="lazy" />{p.crop.name}</span></td>
+ <td class="num">{p.crop.growthDays}</td>
+ <td class="num">{p.crop.regrowDays ?? '-'}</td>
+ <td class="num">{p.harvests}</td>
+ <td class="num">{p.crop.seedCost ?? '?'}</td>
+ <td class="num">{fmt(p.profit)}</td>
+ <td class="num"><strong>{p.profitPerDay.toFixed(1)}</strong></td>
+ <td class="num">{p.crop.unlockLevel === null ? 'TBA' : 'Lv ' + p.crop.unlockLevel}</td>
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ </>
+ ))}
+
+ <h2>How these numbers are computed</h2>
+ <p>Each crop is simulated over a full 28-day season: growth days to first harvest, regrow days between harvests for multi-harvest crops (up to their cap, usually 5), replanting when a crop is exhausted, minus Grocery seed prices, using Best-quality (purple star) sell prices. The <a href="/tools/crop-profit-calculator/">crop profit calculator</a> lets you change quality tier, season length, plot count and Manor-level filters.</p>
+ <p>The community wiki also publishes its own ranking (gold quality over a crop’s full lifespan: Biluochun 20.4, Maojian 17.9, Cotton 15.2, Jinjunmei 21.6 gold/day). Our tables match its winners; small differences come from replant timing and quality tiers, as explained in the <a href="/methodology/">methodology</a>.</p>
+
+ <h2>Early-game priorities</h2>
+ <ul>
+ <li><strong>Manor 1-11:</strong> garlic and potato grow in any season; onions and wheat are cheap spring/summer fillers.</li>
+ <li><strong>Manor 12-18:</strong> strawberries (spring, Lv 12) are the first big earner at 37 base value.</li>
+ <li><strong>Manor 19:</strong> tea unlocks - from here, spring and winter become the richest seasons.</li>
+ <li><strong>Manor 27-30:</strong> summer tea (Maojian) and jasmine complete the set.</li>
+ </ul>
+
+ <h2>Frequently asked questions</h2>
+ {faq.map((f) => (
+ <details class="faq"><summary>{f.q}</summary><div class="a"><p>{f.a}</p></div></details>
+ ))}
+
+ <RelatedTools current="crop-profit-calculator" />
+ <TrustBlock toolName="Best crops guide" feedbackSubject="Best crops guide issue" />
+ </section>
+</Base>

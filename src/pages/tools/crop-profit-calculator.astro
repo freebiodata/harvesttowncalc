@@ -1,0 +1,257 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import FAQ from '../../components/FAQ.astro';
+import RelatedTools from '../../components/RelatedTools.astro';
+import TrustBlock from '../../components/TrustBlock.astro';
+import { crops } from '../../data/crops';
+import { rankCrops } from '../../utils/crop-math';
+import { SITE } from '../../config';
+
+// Default (crawlable) state: 28 days, Best quality, all seasons - server-rendered.
+const DEFAULTS = { season: 'All', days: 28, quality: 'best' as const, maxUnlock: null };
+const ranked = rankCrops(crops, DEFAULTS);
+const best = ranked[0];
+
+// Worked examples, computed at build time so the numbers on the page always match the math.
+const exBiluochun = rankCrops(crops, { season: 'Spring', days: 28, quality: 'best', maxUnlock: null }).find((p) => p.crop.name === 'Biluochun')!;
+const exCotton = rankCrops(crops, { season: 'Autumn', days: 28, quality: 'best', maxUnlock: null }).find((p) => p.crop.name === 'Cotton')!;
+const exStrawberry = rankCrops(crops, { season: 'Spring', days: 28, quality: 'best', maxUnlock: null }).find((p) => p.crop.name === 'Strawberry')!;
+
+const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
+const seasonClass = (s: string) => `chip season-${s.toLowerCase()}`;
+
+const faqItems = [
+ {
+ q: 'Which crop makes the most money in Harvest Town?',
+ a: `Per the community wiki’s own ranking, <strong>Jinjunmei</strong> (winter tea) earns the most per field-day at about 21.6 gold/day, followed by Biluochun (spring tea) at about 20.4. Our calculator reproduces these comparisons for <em>your</em> season, quality and time window - with Best (purple star) quality over a full 28-day season, the top pick is usually a tea crop once you unlock Manor level 19.`,
+ },
+ {
+ q: 'Do crops die if I forget to water them?',
+ a: 'No. According to the wiki, crop death from lack of watering has been temporarily disabled by the developers. Unwatered crops simply pause growth, so a skipped day delays the harvest but does not destroy the plant.',
+ },
+ {
+ q: 'What does “multi-harvest” mean?',
+ a: 'Some crops keep producing after the first harvest: they regrow every few days and can be harvested up to five times before the plant disappears. Teas, beans, chili and corn work this way. The calculator models regrowth and replanting automatically.',
+ },
+ {
+ q: 'Why do your numbers differ slightly from the wiki’s rankings?',
+ a: 'The wiki’s order column is earnings per field-day for gold-quality crops over the crop’s whole lifespan, and its exact harvest-count assumptions are not published. Our calculator uses the formula documented in “How this calculator works” - same source data, transparent assumptions, and you control the inputs. Small differences are expected and usually come from replant timing.',
+ },
+ {
+ q: 'Does crop quality change the sell price?',
+ a: 'Yes. Each crop has up to four price tiers - Basic, Good (white star), Great (gold star) and Best (purple star). Quality improves as your Farming skill rises, so later-game fields earn noticeably more per harvest. Switch the quality dropdown to compare tiers.',
+ },
+ {
+ q: 'Which seeds can I buy for coins, and where?',
+ a: 'Seasonal seeds are sold at the Grocery in Town Square (open 6:00-20:00). A few crops - Wheat, Tomato, Sunflower and Napa Cabbage - had no Grocery seed price published on the wiki at our last check, so the calculator lets you type a seed cost for those.',
+ },
+ {
+ q: 'What should I grow in the greenhouse?',
+ a: 'Grow whatever earns the most per field-day regardless of season. With wiki data that is Jinjunmei tea (winter, about 21.6 gold/day at gold quality) - the calculator’s “All seasons” view with a long time window gives the same answer for your quality tier.',
+ },
+];
+---
+<Base
+ currentPath="/tools/crop-profit-calculator/"
+ title="Harvest Town Crop Profit Calculator | HT Calculator"
+ description="Compare all 32 Harvest Town crops by profit per day. Pick your season, quality tier and field size - growth, regrowth and replanting included."
+ path="/tools/crop-profit-calculator/"
+ breadcrumbs={[
+ { name: 'Home', path: '/' },
+ { name: 'Tools', path: '/tools/' },
+ { name: 'Crop Profit Calculator' },
+ ]}
+ webApp={{
+ name: 'Harvest Town Crop Profit Calculator',
+ description: 'Compare all Harvest Town crops by gold per day for any season, quality tier, time window and field size.',
+ }}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: 'Crop Profit Calculator' }]} />
+
+ <h1>Harvest Town Crop Profit Calculator</h1>
+ <p class="value-line">Rank every crop by gold per day for your season, quality tier and time window - growth, multi-harvest regrowth and replanting included.</p>
+ <p class="trust-microline">Free · No sign-up · Runs in your browser · Wiki data verified {SITE.dataVersion}</p>
+
+ <section class="tool-panel" id="calculator" aria-label="Crop profit calculator">
+ <div class="controls" id="crop-controls">
+ <div class="field">
+ <label for="f-season">Season</label>
+ <select id="f-season">
+ <option value="All" selected>All seasons</option>
+ <option value="Spring">Spring</option>
+ <option value="Summer">Summer</option>
+ <option value="Autumn">Autumn</option>
+ <option value="Winter">Winter</option>
+ <option value="Any">Any-season crops</option>
+ </select>
+ <p class="hint">Or plan a greenhouse with “All seasons”.</p>
+ </div>
+ <div class="field">
+ <label for="f-quality">Crop quality</label>
+ <select id="f-quality">
+ <option value="basic">Basic</option>
+ <option value="good">Good (white star)</option>
+ <option value="great">Great (gold star)</option>
+ <option value="best" selected>Best (purple star)</option>
+ </select>
+ <p class="hint">Better Farming skill → higher tier prices.</p>
+ </div>
+ <div class="field">
+ <label for="f-days">Days remaining (days)</label>
+ <input type="number" id="f-days" min="1" max="336" step="1" value="28" inputmode="numeric" />
+ <p class="hint">Seasons are 28 days. Use fewer mid-season.</p>
+ </div>
+ <div class="field">
+ <label for="f-plots">Plots (fields)</label>
+ <input type="number" id="f-plots" min="1" max="999" step="1" value="1" inputmode="numeric" />
+ <p class="hint">Scales the totals; ranking is per plot.</p>
+ </div>
+ <div class="field">
+ <label for="f-level">Manor level (optional)</label>
+ <input type="number" id="f-level" min="1" max="99" step="1" value="" placeholder="e.g. 19" inputmode="numeric" />
+ <p class="hint">Hides crops you haven’t unlocked.</p>
+ </div>
+ </div>
+
+ <div class="result-summary" id="crop-summary" aria-live="polite">
+ <div class="stat">
+ <div class="k">Best crop</div>
+ <div class="v" id="s-best">{best.crop.name}</div>
+ </div>
+ <div class="stat">
+ <div class="k">Gold per day (per plot)</div>
+ <div class="v" id="s-perday">{best.profitPerDay.toFixed(1)}</div>
+ </div>
+ <div class="stat">
+ <div class="k">Season profit (per plot)</div>
+ <div class="v" id="s-total">{fmt(best.profit)}</div>
+ </div>
+ <div class="stat">
+ <div class="k">With your plots</div>
+ <div class="v" id="s-plots">{fmt(best.profit)}</div>
+ </div>
+ </div>
+ <p class="muted" id="s-note">
+ Showing Best-quality prices over 28 days. {best.crop.name}: {best.harvests} harvests from {best.plantings} planting{best.plantings > 1 ? 's' : ''} in {best.daysUsed} field-days.
+ </p>
+
+ <div class="table-scroll">
+ <table class="data" id="crop-table">
+ <thead>
+ <tr>
+ <th scope="col">Crop</th>
+ <th scope="col">Season</th>
+ <th scope="col" class="num">Grow (d)</th>
+ <th scope="col" class="num">Regrow (d)</th>
+ <th scope="col" class="num">Harvests</th>
+ <th scope="col" class="num">Seed cost</th>
+ <th scope="col" class="num">Yield</th>
+ <th scope="col" class="num">Profit</th>
+ <th scope="col" class="num" title="Profit ÷ days in your window, per plot">Gold/day</th>
+ <th scope="col">Unlock</th>
+ </tr>
+ </thead>
+ <tbody id="crop-tbody">
+ {ranked.map((p, i) => (
+ <tr class={i < 3 ? 'top' : ''}>
+ <td>
+ <span class="item-cell">
+ <img src={`/icons/${p.crop.icon}`} width="32" height="32" alt={`${p.crop.name} icon`} loading={i < 12 ? 'eager' : 'lazy'} />
+ <span>{p.crop.name}</span>
+ {p.crop.multiHarvest && <span class="chip multi" title={`Regrows every ${p.crop.regrowDays} days, up to ${p.crop.maxHarvests} harvests`}>multi</span>}
+ </span>
+ </td>
+ <td><span class={seasonClass(p.crop.season)}>{p.crop.season}</span></td>
+ <td class="num">{p.crop.growthDays}</td>
+ <td class="num">{p.crop.regrowDays ?? '-'}</td>
+ <td class="num">{p.harvests}</td>
+ <td class="num">{p.seedCost === null ? <span title="Seed price not published - enter your own in the table below">?</span> : fmt(p.seedCost)}</td>
+ <td class="num">{fmt(p.yieldCoins)}</td>
+ <td class="num">{fmt(p.profit)}</td>
+ <td class="num"><strong>{p.profitPerDay.toFixed(1)}</strong></td>
+ <td class="num">{p.crop.unlockLevel === null ? 'TBA' : `Lv ${p.crop.unlockLevel}`}</td>
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ <p class="muted">“?” = not published on the wiki yet (seed price or price tier); those cells use base values and you can override them below. “TBA” = unlock level not yet published.</p>
+
+ <h3 style="margin-top:18px">Missing seed prices - enter your own</h3>
+ <p class="muted">The Grocery sells most seasonal seeds, but a few crops had no published coin price at our last check. Type what you pay and the ranking updates:</p>
+ <div class="controls" id="seed-overrides">
+ {crops.filter((c) => c.seedCost === null).map((c) => (
+ <div class="field">
+ <label for={`seed-${c.name.replace(/[^a-z0-9]/gi, '')}`}>{c.name} seed (coins)</label>
+ <input type="number" min="0" max="9999" step="1" value="" placeholder="not on wiki" inputmode="numeric" data-seed-override={c.name} id={`seed-${c.name.replace(/[^a-z0-9]/gi, '')}`} />
+ </div>
+ ))}
+ </div>
+ </section>
+
+ <section class="prose">
+ <h2>How to use the crop calculator</h2>
+ <ol>
+ <li><strong>Pick the season</strong> you’re planning (or “All seasons” for greenhouse planning).</li>
+ <li><strong>Choose your quality tier</strong> - if you’re early game, Basic or Good is realistic; purple-star prices belong to high Farming skill.</li>
+ <li><strong>Set days and plots</strong>: days left in the season (28 max) and how many fields you’ll plant.</li>
+ <li><strong>Optionally cap your Manor level</strong> to hide crops you can’t buy seeds for yet.</li>
+ <li><strong>Read the table</strong>: it ranks by gold per field-day. “Harvests” counts every regrow harvest plus replanting within your window.</li>
+ </ol>
+
+ <h2>What this calculator does differently</h2>
+ <ul>
+ <li><strong>Real regrowth modelling.</strong> Multi-harvest crops regrow on their own schedule (usually every 2 days, up to 5 harvests) - the calculator replants when a crop is exhausted instead of assuming one planting per season.</li>
+ <li><strong>All four quality tiers</strong> with per-crop sell prices, not just gold-quality values.</li>
+ <li><strong>Seed costs subtracted</strong> using Grocery prices (overridable where the wiki has gaps).</li>
+ <li><strong>Everything visible at once:</strong> 32 crops, unlock levels, growth and regrow days - no paging, no sign-up, no ads over the table.</li>
+ </ul>
+
+ <h2>Worked examples</h2>
+ <div class="table-scroll">
+ <table class="data">
+ <thead>
+ <tr><th>Crop</th><th class="num">Window</th><th class="num">Harvests</th><th class="num">Plantings</th><th class="num">Yield</th><th class="num">Seeds</th><th class="num">Profit</th><th class="num">Gold/day</th></tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td><span class="item-cell"><img src="/icons/Biluochun.webp" width="32" height="32" alt="Biluochun icon" loading="lazy" />Biluochun (Best)</span></td>
+ <td class="num">28 d spring</td><td class="num">{exBiluochun.harvests}</td><td class="num">{exBiluochun.plantings}</td>
+ <td class="num">{fmt(exBiluochun.yieldCoins)}</td><td class="num">{fmt(exBiluochun.seedCost ?? 0)}</td>
+ <td class="num">{fmt(exBiluochun.profit)}</td><td class="num"><strong>{exBiluochun.profitPerDay.toFixed(1)}</strong></td>
+ </tr>
+ <tr>
+ <td><span class="item-cell"><img src="/icons/Cotton.webp" width="32" height="32" alt="Cotton icon" loading="lazy" />Cotton (Best)</span></td>
+ <td class="num">28 d autumn</td><td class="num">{exCotton.harvests}</td><td class="num">{exCotton.plantings}</td>
+ <td class="num">{fmt(exCotton.yieldCoins)}</td><td class="num">{fmt(exCotton.seedCost ?? 0)}</td>
+ <td class="num">{fmt(exCotton.profit)}</td><td class="num"><strong>{exCotton.profitPerDay.toFixed(1)}</strong></td>
+ </tr>
+ <tr>
+ <td><span class="item-cell"><img src="/icons/Strawberry.webp" width="32" height="32" alt="Strawberry icon" loading="lazy" />Strawberry (Best)</span></td>
+ <td class="num">28 d spring</td><td class="num">{exStrawberry.harvests}</td><td class="num">{exStrawberry.plantings}</td>
+ <td class="num">{fmt(exStrawberry.yieldCoins)}</td><td class="num">{fmt(exStrawberry.seedCost ?? 0)}</td>
+ <td class="num">{fmt(exStrawberry.profit)}</td><td class="num"><strong>{exStrawberry.profitPerDay.toFixed(1)}</strong></td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+ <p class="muted">Reading the Biluochun row: it grows 4 days, then regrows every 2 days for up to 5 harvests (12 field-days per planting), so a 28-day spring fits two full plantings - 10 harvests - before the season ends.</p>
+
+ <h2>How this calculator works</h2>
+ <p><strong>Data.</strong> Crop names, seasons, unlock levels, growth and regrow days, harvest caps, sell prices per quality tier and Grocery seed prices come from the <a href="https://harvest-town.fandom.com/wiki/Crops" rel="noopener">Harvest Town Wiki Crops page</a> and each crop’s detail page, verified {SITE.dataVersion}. All prices are coins (the game’s currency).</p>
+ <p><strong>Formula.</strong> For each crop the calculator simulates one field plot across your time window: plant → wait <em>growth days</em> → harvest → wait <em>regrow days</em> (multi-harvest crops, up to their harvest cap) → replant → repeat while enough days remain. Profit = (harvests × sell price) - (plantings × seed cost). Gold/day = profit ÷ days in your window. Totals scale linearly with plots.</p>
+ <p><strong>Known limitations.</strong>
+ (1) The wiki’s own “order” column (e.g. Biluochun 20.4 gold/day) is computed for gold quality over a crop’s full lifespan with unpublished harvest assumptions, so our numbers can differ slightly.
+ (2) Price tiers are missing on the wiki for some crops (marked “?”); the calculator falls back to base price.
+ (3) Scale Powder (instant growth), fertilizers and the Logistics Hub’s order bonuses are not modelled.
+ (4) Game updates can change any number - we re-verify against the wiki and log every change in the <a href="/changelog/">changelog</a>.</p>
+
+ <FAQ items={faqItems} />
+ <RelatedTools current="crop-profit-calculator" />
+ <TrustBlock toolName="Crop Profit Calculator" feedbackSubject="Crop calculator data issue" />
+ </section>
+</Base>
+
+<script type="application/json" id="crop-data" set:html={JSON.stringify(crops)} />
+<script src="../../scripts/crop-calculator.ts"></script>

@@ -1,0 +1,13 @@
+---
+import { SITE } from '../config';
+const { toolName, feedbackSubject }: { toolName: string; feedbackSubject?: string } = Astro.props;
+---
+<div class="trust-block">
+ <p>
+ Data: community <a href="https://harvest-town.fandom.com" rel="noopener">Harvest Town Wiki</a>, verified {SITE.dataVersion}.
+ Math runs in your browser - <a href="/privacy/">nothing is uploaded</a>.
+ Method and limitations: <a href="/methodology/">methodology</a>.
+ Spot an error? <a href={`/contact/?subject=${encodeURIComponent(feedbackSubject || toolName)}`}>Tell us</a> - corrections usually ship within a week.
+ </p>
+ <p>Last reviewed: {SITE.dataVersion} · Maintained by the <a href="/about/">HT Calculator team</a></p>
+</div>

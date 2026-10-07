@@ -1,0 +1,34 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+---
+<Base
+ currentPath="/contact/"
+ title="Contact & Corrections - HT Calculator"
+ description="Report a wrong price, fill a data gap, or suggest a Harvest Town calculator. Corrections usually ship within a week."
+ path="/contact/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Contact' }]}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Contact' }]} />
+ <h1>Contact and corrections</h1>
+ <p class="value-line">The fastest way to improve these tools is to tell us what the game actually shows you.</p>
+
+ <section class="prose">
+ <h2>Report wrong or missing data</h2>
+ <p>Email <strong>hello@harvesttowncalc.top</strong> with:</p>
+ <ol>
+ <li>The page or tool name (e.g. “crop calculator”);</li>
+ <li>The item and the field (e.g. “Goose Feather sell price”);</li>
+ <li>What the game shows, and - if you know - the quality tier.</li>
+ </ol>
+ <p>Data corrections usually ship within a week and are recorded in the <a href="/changelog/">changelog</a>. Especially valuable right now: feather and alpaca prices, seed prices for Wheat/Tomato/Sunflower/Napa Cabbage, and any star-quality fish prices.</p>
+
+ <h2>Everything else</h2>
+ <ul>
+ <li><strong>Feature ideas</strong> (an orchard calculator? cooking profits?) - same address, put “idea” in the subject.</li>
+ <li><strong>Rights-holder requests</strong> (asset licensing) - same address, marked urgent; we act promptly.</li>
+ <li><strong>Privacy questions</strong> - see the <a href="/privacy/">privacy policy</a> first; it’s short.</li>
+ </ul>
+ <p>Expected response time: a few days. We’re players with day jobs, not a support desk.</p>
+ </section>
+</Base>

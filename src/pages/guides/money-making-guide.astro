@@ -1,0 +1,111 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import RelatedTools from '../../components/RelatedTools.astro';
+import TrustBlock from '../../components/TrustBlock.astro';
+import { crops } from '../../data/crops';
+import { animals } from '../../data/animals';
+import { fish } from '../../data/fish';
+import { rankCrops } from '../../utils/crop-math';
+import { SITE } from '../../config';
+
+const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
+const bestCrop = rankCrops(crops, { season: 'All', days: 28, quality: 'best', maxUnlock: null })[0];
+const midCrop = rankCrops(crops, { season: 'All', days: 28, quality: 'good', maxUnlock: null })[0];
+
+const animalRows = animals
+ .map((a) => {
+ const known = a.products.filter((p) => p.sellBasic !== null);
+ const daily = known.reduce((s, p) => s + (p.sellBasic ?? 0), 0);
+ return { a, daily, payback: daily > 0 ? a.price / daily : null };
+ })
+ .filter((r) => r.daily > 0)
+ .sort((x, y) => x.payback! - y.payback!);
+
+const fishVals = [...fish].sort((a, b) => b.price - a.price);
+const kings = fish.filter((f) => f.name.includes('King'));
+const steady = fishVals.filter((f) => !f.name.includes('King') && f.level <= 10).slice(0, 5);
+---
+<Base
+ currentPath="/guides/money-making-guide/"
+ title="How to Make Money in Harvest Town | HT Calculator"
+ description="Harvest Town money-making compared with real numbers: crop gold per day, animal payback times and fishing values, plus early- and late-game plans."
+ path="/guides/money-making-guide/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Guides', path: '/guides/' }, { name: 'How to Make Money' }]}
+ article={{
+ headline: 'How to Make Money in Harvest Town: Crops vs Animals vs Fishing',
+ datePublished: '2026-10-07',
+ dateModified: SITE.dataVersion,
+ authorName: 'HT Calculator team',
+ }}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Guides', path: '/guides/' }, { name: 'How to Make Money' }]} />
+
+ <h1>How to make money in Harvest Town</h1>
+ <p class="value-line">Crops, animals and fishing compared with the game’s real numbers, so you can put your energy where the coins are.</p>
+ <p class="trust-microline">By the HT Calculator team · Updated {SITE.dataVersion} · Data: Harvest Town Wiki</p>
+
+ <section class="prose">
+ <h2>Quick answer</h2>
+ <p><strong>Farming is the engine, animals are the passive income, fishing is the bonus.</strong> A full field of the best crop ({bestCrop.crop.name} at Best quality) earns about <strong>{fmt(bestCrop.profit)} coins per plot per 28-day season</strong> ({bestCrop.profitPerDay.toFixed(1)}/day). Chickens pay for themselves in ~25 days and then produce forever. And the seven Fish Kings are jackpots worth up to {fmt(fishVals[0].price)} coins each - but you can’t plan a budget around them.</p>
+
+ <h2>Crops: the main engine</h2>
+ <p>Crops scale with how much land and water you can manage, and the ceiling keeps rising with your Farming skill (quality tiers multiply prices). At Good quality the best crop is <strong>{midCrop.crop.name}</strong> at {midCrop.profitPerDay.toFixed(1)} gold/day - at Best quality it’s <strong>{bestCrop.crop.name}</strong> at {bestCrop.profitPerDay.toFixed(1)} gold/day. Full rankings, quality tiers and Manor-level filters: <a href="/tools/crop-profit-calculator/">crop profit calculator</a>; per-season detail in <a href="/guides/best-crops-per-season/">the best-crops guide</a>.</p>
+
+ <h2>Animals: passive daily income</h2>
+ <p>Animals produce every day with no field space and no watering. Payback times at basic-quality prices (feed assumed free via grazing):</p>
+ <div class="table-scroll">
+ <table class="data">
+ <thead><tr><th>Animal</th><th class="num">Buy</th><th class="num">Income/day</th><th class="num">Pays back in</th><th>Products</th></tr></thead>
+ <tbody>
+ {animalRows.map((r, i) => (
+ <tr class={i === 0 ? 'top' : ''}>
+ <td><span class="item-cell"><img src={`/icons/${r.a.icon}`} width="32" height="32" alt={`${r.a.name} icon`} loading="lazy" />{r.a.name}</span></td>
+ <td class="num">{fmt(r.a.price)}</td>
+ <td class="num">{fmt(r.daily)}</td>
+ <td class="num"><strong>{Math.round(r.payback!)} d</strong></td>
+ <td class="muted">{r.a.products.map((p) => p.name).join(', ')}</td>
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ <p>Fondness raises product quality and price over time, so these numbers are a floor. Feather prices (ducks, geese, peacocks, alpacas) aren’t published on the wiki - enter yours in the <a href="/tools/animal-profit-calculator/">animal calculator</a>.</p>
+
+ <h2>Fishing: flexible bonus income</h2>
+ <p>Early fishing (level ≤ 10, cheap bait) tops out around {fmt(steady[0].price)} coins per catch for common species like {steady.map((f) => f.name).slice(0, 3).join(', ')}. The real money is in the seven Fish Kings - level 40+, king bait, narrow time windows:</p>
+ <div class="table-scroll">
+ <table class="data">
+ <thead><tr><th>Fish King</th><th>Location</th><th class="num">Price</th></tr></thead>
+ <tbody>
+ {kings.map((k) => (
+ <tr><td><span class="item-cell"><img src={`/icons/${k.icon}`} width="32" height="32" alt={`${k.name} icon`} loading="lazy" />{k.name}</span></td><td class="muted">{k.location}</td><td class="num"><strong>{fmt(k.price)}</strong></td></tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ <p>All {fish.length} species with locations, bait and coins-per-XP: <a href="/tools/fishing-price-guide/">fishing price guide</a>.</p>
+
+ <h2>A practical money plan</h2>
+ <ol>
+ <li><strong>Week 1:</strong> Clear and plant any-season garlic/potato; buy a chicken (500) as soon as the Poultry House exists.</li>
+ <li><strong>Month 1:</strong> All fields in the best crop you’ve unlocked; chickens → cow; fish the Manor River with primary bait between chores.</li>
+ <li><strong>Manor 19:</strong> Switch spring/winter to tea. This is the single biggest income jump in the game.</li>
+ <li><strong>Manor 27+:</strong> Complete the tea set (Maojian, Jasmine), upgrade barns, and start collecting Fish Kings with saved king bait.</li>
+ <li><strong>Greenhouse:</strong> Jinjunmei year-round - it’s the best crop in the game, so any protected plot grows it.</li>
+ </ol>
+
+ <h2>Things that quietly drain coins</h2>
+ <ul>
+ <li><strong>Buying feed</strong> when forage seeds cost 3 coins - graze animals on planted forage instead.</li>
+ <li><strong>Replanting long crops late in the season</strong> - a 12-day lifespan crop planted on day 24 wastes the field. The calculator’s “days remaining” input catches this.</li>
+ <li><strong>Selling raw what crafts high</strong> - beans → tofu, milk → cheese-style goods often beat raw prices (workshop recipes are outside this guide’s dataset; check the workshop in-game).</li>
+ </ul>
+
+ <h2>Method and sources</h2>
+ <p>All figures derive from the Harvest Town Wiki (crops, livestock, fish pages) verified {SITE.dataVersion}, computed with the formulas on our <a href="/methodology/">methodology page</a>. Game updates can change any value; corrections are welcome via <a href="/contact/">contact</a>.</p>
+
+ <RelatedTools />
+ <TrustBlock toolName="Money-making guide" feedbackSubject="Money guide issue" />
+ </section>
+</Base>

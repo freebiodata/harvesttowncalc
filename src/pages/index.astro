@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import { TOOLS, GUIDES, SITE } from '../config';
+import { crops } from '../data/crops';
+import { rankCrops } from '../utils/crop-math';
+
+const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
+const best = rankCrops(crops, { season: 'All', days: 28, quality: 'best', maxUnlock: null })[0];
+const springBest = rankCrops(crops, { season: 'Spring', days: 28, quality: 'best', maxUnlock: null })[0];
+const summerBest = rankCrops(crops, { season: 'Summer', days: 28, quality: 'best', maxUnlock: null })[0];
+const autumnBest = rankCrops(crops, { season: 'Autumn', days: 28, quality: 'best', maxUnlock: null })[0];
+const winterBest = rankCrops(crops, { season: 'Winter', days: 28, quality: 'best', maxUnlock: null })[0];
+---
+<Base
+ currentPath="/"
+ title="Harvest Town Calculator - Crops, Animals, Fishing & Gifts"
+ description="Free Harvest Town calculators: crop gold per day, animal payback, all fish prices and the NPC gift planner. Wiki-verified data, no sign-up."
+ path="/"
+>
+ <h1>Harvest Town calculators &amp; guides</h1>
+ <p class="value-line">
+ Work out what to plant, which animal to buy, where to fish and what to gift - with the game’s real numbers.
+ Best crop right now at Best quality: <strong>{best.crop.name} ({best.profitPerDay.toFixed(1)} gold/day)</strong>.
+ </p>
+ <p class="trust-microline">Free · No sign-up · No ads over the tools · Data verified {SITE.dataVersion}</p>
+
+ <div class="grid-cards">
+ {TOOLS.map((t) => (
+ <a class="tool-card" href={`/tools/${t.slug}/`}>
+ <img src={`/icons/${t.icon}`} width="48" height="48" alt="" />
+ <span>
+ <span class="t">{t.name}</span>
+ <span class="d">{t.oneLiner}</span>
+ </span>
+ </a>
+ ))}
+ </div>
+
+ <section class="prose">
+ <h2>This season’s best crops at a glance</h2>
+ <p>Best-quality prices over a full 28-day season, per plot - computed from wiki data at page build. For your own quality tier, field size and Manor level, use the <a href="/tools/crop-profit-calculator/">crop profit calculator</a>.</p>
+ <div class="table-scroll">
+ <table class="data">
+ <thead><tr><th>Season</th><th>Best crop</th><th class="num">Gold/day</th><th class="num">Season profit</th><th>Unlock</th></tr></thead>
+ <tbody>
+ <tr><td><span class="chip season-spring">Spring</span></td><td><span class="item-cell"><img src={`/icons/${springBest.crop.icon}`} width="32" height="32" alt="" loading="lazy" />{springBest.crop.name}</span></td><td class="num"><strong>{springBest.profitPerDay.toFixed(1)}</strong></td><td class="num">{fmt(springBest.profit)}</td><td class="num">Lv {springBest.crop.unlockLevel}</td></tr>
+ <tr><td><span class="chip season-summer">Summer</span></td><td><span class="item-cell"><img src={`/icons/${summerBest.crop.icon}`} width="32" height="32" alt="" loading="lazy" />{summerBest.crop.name}</span></td><td class="num"><strong>{summerBest.profitPerDay.toFixed(1)}</strong></td><td class="num">{fmt(summerBest.profit)}</td><td class="num">Lv {summerBest.crop.unlockLevel}</td></tr>
+ <tr><td><span class="chip season-autumn">Autumn</span></td><td><span class="item-cell"><img src={`/icons/${autumnBest.crop.icon}`} width="32" height="32" alt="" loading="lazy" />{autumnBest.crop.name}</span></td><td class="num"><strong>{autumnBest.profitPerDay.toFixed(1)}</strong></td><td class="num">{fmt(autumnBest.profit)}</td><td class="num">Lv {autumnBest.crop.unlockLevel}</td></tr>
+ <tr><td><span class="chip season-winter">Winter</span></td><td><span class="item-cell"><img src={`/icons/${winterBest.crop.icon}`} width="32" height="32" alt="" loading="lazy" />{winterBest.crop.name}</span></td><td class="num"><strong>{winterBest.profitPerDay.toFixed(1)}</strong></td><td class="num">{fmt(winterBest.profit)}</td><td class="num">{winterBest.crop.unlockLevel === null ? 'TBA' : 'Lv ' + winterBest.crop.unlockLevel}</td></tr>
+ </tbody>
+ </table>
+ </div>
+
+ <h2>Why HT Calculator</h2>
+ <ul>
+ <li><strong>Real game data, dated.</strong> Every price, growth day and gift preference is checked against the <a href="https://harvest-town.fandom.com" rel="noopener">Harvest Town Wiki</a> and stamped with the verification date. Gaps are shown as gaps - never invented.</li>
+ <li><strong>Answers in seconds.</strong> The tool is the first thing on the page. On a phone, the controls are above the fold.</li>
+ <li><strong>Private.</strong> Everything computes in your browser. No account, no uploads - see the <a href="/privacy/">privacy policy</a>.</li>
+ <li><strong>Full modelling.</strong> Multi-harvest regrowth, replant cycles, seed costs and quality tiers are all in the math - documented on the <a href="/methodology/">methodology page</a>.</li>
+ </ul>
+
+ <h2>Guides</h2>
+ <div class="grid-cards">
+ {GUIDES.map((g) => (
+ <a class="tool-card" href={`/guides/${g.slug}/`}>
+ <span>
+ <span class="t">{g.name}</span>
+ <span class="d">{g.oneLiner}</span>
+ </span>
+ </a>
+ ))}
+ </div>
+
+ <h2>About this site</h2>
+ <p>HT Calculator is an unofficial fan project for the mobile game Harvest Town, maintained by players. It exists because planning a season shouldn’t require a spreadsheet. Read <a href="/about/">who we are</a>, <a href="/methodology/">how the tools work</a>, or <a href="/contact/">send a correction</a> - the data improves with every report.</p>
+ </section>
+</Base>

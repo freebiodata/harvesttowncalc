@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+---
+<Base
+ currentPath="/disclaimer/"
+ title="Disclaimer - Unofficial Fan Tool | HT Calculator"
+ description="HT Calculator is an unofficial Harvest Town fan tool. Game data can be outdated or wrong; verify in-game. Not affiliated with the game's developer."
+ path="/disclaimer/"
+ breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Disclaimer' }]}
+>
+ <Breadcrumbs crumbs={[{ name: 'Home', path: '/' }, { name: 'Disclaimer' }]} />
+ <h1>Disclaimer</h1>
+
+ <section class="prose">
+ <h2>Unofficial fan project</h2>
+ <p>HT Calculator is not affiliated with, endorsed by, or sponsored by AVIDGamers or Dataverse Co., Limited, the developer and publisher of Harvest Town. “Harvest Town” and all game assets are trademarks of and © their respective owners. This site uses item icons and NPC portraits sourced from the community <a href="https://harvest-town.fandom.com" rel="noopener">Harvest Town Wiki</a> for identification purposes only. Rights-holder requests are handled promptly via <a href="/contact/">contact</a>.</p>
+
+ <h2>Data accuracy</h2>
+ <p>All prices, growth times, unlock levels and gift lists are transcribed from the community wiki and dated. The wiki can lag behind game updates, and transcription errors are possible despite our checks. <strong>Verify important numbers in-game before committing coins.</strong> Report discrepancies and we’ll fix them within about a week.</p>
+
+ <h2>No game advantages</h2>
+ <p>These tools do calculations you could do by hand with the wiki; they don’t modify, automate or interact with the game, its servers, or your account.</p>
+ </section>
+</Base>
